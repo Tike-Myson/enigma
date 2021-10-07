@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Pair struct {
 	First string
@@ -14,7 +17,12 @@ func main() {
 	var message string
 	fmt.Println("Enter your message")
 	fmt.Scanf("%s\n", &message)
-
+	message = Sanitize(message)
+	fmt.Printf("Total symbols: %d\n", len([]byte(message)))
+	fmt.Println("Analysis: ")
+	fmt.Printf("Before: %f\n", FrequencyAnalysis(message))
+	//fmt.Println("***********************")
+	start := time.Now();
 	//commutation
 	pairs := make(map[string]string)
 	pairs["A"] = "B"
@@ -31,9 +39,12 @@ func main() {
 
 	//answer := Switch(pairs, message)
 	answer := Rotor(key, message)
-	fmt.Println(answer)
-	answer = RotorDecrypt(key, answer)
-	fmt.Println(answer)
+	fmt.Printf("Before: %f\n", FrequencyAnalysis(answer))
+	end := time.Now()
+	timer := end.Sub(start)
+	fmt.Println(timer)
+	//answer = RotorDecrypt(key, answer)
+	//fmt.Println(answer)
 	//answer = Switch(pairs, answer)
 
 }
@@ -174,4 +185,85 @@ func SwitchAlphabetReverse(char byte, position int) byte {
 		return byte(int(char) - position + 25)
 	}
 	return byte(int(char) - position)
+}
+
+func FrequencyAnalysis(msg string) float64 {
+
+	result := 0.0
+
+	FrequencyTable := map[string]float64{
+		"E": 12.02,
+		"T": 9.10,
+		"A": 8.12,
+		"O": 7.68,
+		"I": 7.31,
+		"N": 6.95,
+		"S": 6.28,
+		"R": 6.02,
+		"H": 5.92,
+		"D": 4.32,
+		"L": 3.98,
+		"U": 2.88,
+		"C": 2.71,
+		"M": 2.61,
+		"F": 2.30,
+		"Y": 2.11,
+		"W": 2.09,
+		"G": 2.03,
+		"P": 1.82,
+		"B": 1.49,
+		"V": 1.11,
+		"K": 0.69,
+		"X": 0.17,
+		"Q": 0.11,
+		"J": 0.10,
+		"Z": 0.07,
+	}
+
+	MessageFrequency := make(map[string]float64)
+
+	EnglishMessage := make(map[string]int)
+	//EnglishOriginal := make(map[string]int)
+	Alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	//fill map with 0 values
+	for _, v := range Alphabet {
+		EnglishMessage[string(v)] = 0
+		//EnglishOriginal[string(v)] = 0
+	}
+
+	//increment map values
+	for _, v := range msg {
+		EnglishMessage[string(v)] += 1
+	}
+
+	lenMsg := float64(len(msg))
+
+	//fill MessageFrequency
+	for k, v := range EnglishMessage {
+		MessageFrequency[k] = float64(v) * 100.0/lenMsg
+	}
+
+	//fmt.Println(FrequencyTable)
+	//fmt.Println(MessageFrequency)
+
+	for k, v := range MessageFrequency {
+		if v >= FrequencyTable[k] - 1.1 && v <= FrequencyTable[k] + 1.1 {
+			result += 3.846
+		}
+	}
+	return result
+}
+
+func Sanitize(in string) string {
+	var out []rune
+	for _, v := range in {
+		if 65 <= v && v <= 90 {
+			out = append(out, v)
+		} else if 97 <= v && v <= 122 {
+			out = append(out, v-32)
+		}
+	}
+
+	return string(out)
 }
